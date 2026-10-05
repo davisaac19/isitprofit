@@ -1,0 +1,9 @@
+allowBuilds:
+  esbuild: set this to true or false
+  vue-demi: set this to true or false
+# Dependencias cuyo postinstall sí necesitamos ejecutar.
+# esbuild: lo usa Vite para compilar.
+# vue-demi: lo usa Pinia para resolver la versión de Vue.
+onlyBuiltDependencies:
+  - esbuild
+  - vue-demi

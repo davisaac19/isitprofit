@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+/*
+ * Tema de ¿Sí Gané?
+ * Verde = ganaste · Rojo = perdiste · Ámbar = quedaste tablas.
+ * Se define aquí (no en los componentes) para que la app se vea coherente.
+ */
+@theme {
+  --color-brand-50: #eefbf4;
+  --color-brand-100: #d6f5e4;
+  --color-brand-200: #b0e9cd;
+  --color-brand-300: #7bd7ae;
+  --color-brand-400: #45bd8a;
+  --color-brand-500: #1fa06e;
+  --color-brand-600: #0f8a5f;
+  --color-brand-700: #0c6c4c;
+  --color-brand-800: #0b563e;
+  --color-brand-900: #094734;
+
+  --color-loss-50: #fef2f2;
+  --color-loss-100: #fee2e2;
+  --color-loss-500: #ef4444;
+  --color-loss-600: #dc2626;
+  --color-loss-700: #b91c1c;
+
+  --color-even-50: #fffbeb;
+  --color-even-100: #fef3c7;
+  --color-even-500: #f59e0b;
+  --color-even-600: #d97706;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+    font-family:
+      ui-rounded,
+      'SF Pro Rounded',
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      sans-serif;
+  }
+
+  /* Los inputs en móvil deben sentirse cómodos y no hacer zoom al enfocar. */
+  input,
+  button,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  input[inputmode='decimal'],
+  input[inputmode='numeric'] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* Números de dinero: grandes, alineados y fáciles de comparar. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
