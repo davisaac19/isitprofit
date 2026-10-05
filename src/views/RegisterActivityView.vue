@@ -152,7 +152,7 @@ const canContinueText = computed(() => (isLastStep.value ? 'Ver mi resultado' : 
         v-if="step === 1"
         v-model="form.name"
         label="¿Qué vendiste?"
-        placeholder="Manzanas forradas"
+        placeholder="Escribe el nombre de lo que vendiste"
         testid="input-name"
         autofocus
         maxlength="60"
