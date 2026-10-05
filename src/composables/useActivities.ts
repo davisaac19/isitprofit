@@ -17,6 +17,7 @@ export function useActivities() {
     loading,
     load: (force = false) => store.load(force),
     add: (draft: ActivityDraft): Promise<Activity> => store.add(draft),
+    upsert: (activity: Activity) => store.upsert(activity),
     remove: (id: string) => store.remove(id),
     byId: (id: string) => store.byId(id),
   }

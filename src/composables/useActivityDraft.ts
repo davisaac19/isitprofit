@@ -34,27 +34,28 @@ function emptyForm(): ActivityDraftForm {
   }
 }
 
-function loadForm(): ActivityDraftForm {
+function loadForm(storageKey: string): { form: ActivityDraftForm; hasStoredDraft: boolean } {
   const base = emptyForm()
   try {
-    const stored = window.sessionStorage.getItem(STORAGE_KEY)
-    if (!stored) return base
+    const stored = window.sessionStorage.getItem(storageKey)
+    if (!stored) return { form: base, hasStoredDraft: false }
     const parsed: unknown = JSON.parse(stored)
-    if (typeof parsed !== 'object' || parsed === null) return base
-    return { ...base, ...(parsed as Partial<ActivityDraftForm>) }
+    if (typeof parsed !== 'object' || parsed === null) return { form: base, hasStoredDraft: false }
+    return { form: { ...base, ...(parsed as Partial<ActivityDraftForm>) }, hasStoredDraft: true }
   } catch {
-    return base
+    return { form: base, hasStoredDraft: false }
   }
 }
 
-export function useActivityDraft() {
-  const form = reactive<ActivityDraftForm>(loadForm())
+export function useActivityDraft(storageKey = STORAGE_KEY) {
+  const { form: initialForm, hasStoredDraft } = loadForm(storageKey)
+  const form = reactive<ActivityDraftForm>(initialForm)
 
   watch(
     form,
     (value) => {
       try {
-        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+        window.sessionStorage.setItem(storageKey, JSON.stringify(value))
       } catch {
         /* sin espacio o modo privado: el borrador simplemente no persiste */
       }
@@ -67,11 +68,11 @@ export function useActivityDraft() {
   function clear(): void {
     Object.assign(form, emptyForm())
     try {
-      window.sessionStorage.removeItem(STORAGE_KEY)
+      window.sessionStorage.removeItem(storageKey)
     } catch {
       /* ignorado a propósito */
     }
   }
 
-  return { form, clear }
+  return { form, clear, hasStoredDraft }
 }

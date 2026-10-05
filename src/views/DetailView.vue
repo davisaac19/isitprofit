@@ -49,6 +49,13 @@ async function confirmDelete(): Promise<void> {
         >
           Ver resultado
         </AppButton>
+        <AppButton
+          variant="secondary"
+          block
+          @click="router.push({ path: '/registrar', query: { editar: activity.id } })"
+        >
+          Editar actividad
+        </AppButton>
         <AppButton variant="ghost" block @click="confirmOpen = true">Borrar actividad</AppButton>
       </div>
     </template>

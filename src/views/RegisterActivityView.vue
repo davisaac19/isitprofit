@@ -11,22 +11,54 @@ import { useActivityDraft } from '../composables/useActivityDraft'
 import { parseActivityForm } from '../composables/useActivityForm'
 import { useActivities } from '../composables/useActivities'
 import { calculateActivity } from '../domain/calculations'
-import { formatSignedMoney, parseMoneyToCents } from '../domain/money'
+import { centsToInput, formatSignedMoney, parseMoneyToCents } from '../domain/money'
+import type { Activity } from '../types/activity'
 
 const route = useRoute()
 const router = useRouter()
-const { form, clear } = useActivityDraft()
-const { add } = useActivities()
+const editId = typeof route.query.editar === 'string' ? route.query.editar : ''
+const { form, clear, hasStoredDraft } = useActivityDraft(
+  editId ? `si-gane:edit-draft:${editId}` : undefined,
+)
+const { add, upsert, byId, loaded, loading } = useActivities()
 
 const TOTAL_STEPS = 4
 const saving = ref(false)
 const showErrors = ref(false)
+const editInitialized = ref(false)
 
 const parsed = computed(() => parseActivityForm(form))
 const errors = computed(() => parsed.value.errors)
+const activityToEdit = computed(() => (editId ? byId(editId) : undefined))
+const isEditing = computed(() => Boolean(editId))
 
 /** Vista previa en vivo: la gracias de poner la venta antes del resultado. */
 const preview = computed(() => calculateActivity(parsed.value.draft))
+
+watch(
+  [activityToEdit, loading],
+  ([activity, isLoading]) => {
+    if (!editId || editInitialized.value || !activity || isLoading) return
+
+    if (!hasStoredDraft) {
+      const timeMinutes = activity.timeMinutes ?? 0
+      Object.assign(form, {
+        name: activity.name,
+        spent: centsToInput(activity.spentCents),
+        usedPreviousInputs: activity.previousInputsCostCents > 0,
+        previousInputs: centsToInput(activity.previousInputsCostCents),
+        revenue: centsToInput(activity.revenueCents),
+        quantity: activity.quantity === undefined ? '' : String(activity.quantity),
+        unitPrice:
+          activity.unitPriceCents === undefined ? '' : centsToInput(activity.unitPriceCents),
+        hours: timeMinutes ? String(Math.floor(timeMinutes / 60)) : '',
+        minutes: timeMinutes ? String(timeMinutes % 60) : '',
+      })
+    }
+    editInitialized.value = true
+  },
+  { immediate: true },
+)
 
 const stepTitles = ['¿Qué vendiste?', '¿Cuánto gastaste?', '¿Cuánto vendiste?', '¿Cuánto tiempo te tomó?']
 const stepSubtitles = [
@@ -51,7 +83,10 @@ const step = computed<number>(() => {
 
 function goToStep(next: number): void {
   showErrors.value = false
-  const query = next <= 1 ? {} : { paso: String(next) }
+  const query = {
+    ...(editId ? { editar: editId } : {}),
+    ...(next <= 1 ? {} : { paso: String(next) }),
+  }
   if (next === step.value) return
   void router.replace({ query })
 }
@@ -75,7 +110,7 @@ function next(): void {
 function back(): void {
   showErrors.value = false
   if (step.value > 1) goToStep(step.value - 1)
-  else void router.push('/')
+  else void router.push(editId ? `/actividad/${editId}` : '/')
 }
 
 async function save(): Promise<void> {
@@ -85,7 +120,30 @@ async function save(): Promise<void> {
 
   saving.value = true
   try {
-    const activity = await add(draft)
+    let activity: Activity
+    if (editId) {
+      const existing = activityToEdit.value
+      if (!existing) throw new Error(`Cannot edit missing activity: ${editId}`)
+
+      const updated: Activity = {
+        ...existing,
+        name: draft.name,
+        spentCents: draft.spentCents ?? 0,
+        previousInputsCostCents: draft.previousInputsCostCents ?? 0,
+        revenueCents: draft.revenueCents ?? 0,
+      }
+      if (draft.quantity === undefined) delete updated.quantity
+      else updated.quantity = draft.quantity
+      if (draft.unitPriceCents === undefined) delete updated.unitPriceCents
+      else updated.unitPriceCents = draft.unitPriceCents
+      if (draft.timeMinutes === undefined) delete updated.timeMinutes
+      else updated.timeMinutes = draft.timeMinutes
+
+      await upsert(updated)
+      activity = updated
+    } else {
+      activity = await add(draft)
+    }
     clear()
     await router.replace(`/resultado/${activity.id}`)
   } finally {
@@ -123,11 +181,15 @@ watch(
 )
 
 const isLastStep = computed(() => step.value === TOTAL_STEPS)
-const canContinueText = computed(() => (isLastStep.value ? 'Ver mi resultado' : 'Continuar'))
+const canContinueText = computed(() => {
+  if (!isLastStep.value) return 'Continuar'
+  return isEditing.value ? 'Guardar cambios' : 'Ver mi resultado'
+})
 </script>
 
 <template>
   <PageShell>
+    <template v-if="!isEditing || activityToEdit">
     <AppHeader />
 
     <!-- Progreso -->
@@ -143,7 +205,9 @@ const canContinueText = computed(() => (isLastStep.value ? 'Ver mi resultado' : 
       </div>
     </div>
 
-    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ stepTitles[step - 1] }}</h1>
+    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+      {{ isEditing ? `Editar: ${stepTitles[step - 1]}` : stepTitles[step - 1] }}
+    </h1>
     <p class="mt-1 text-slate-500">{{ stepSubtitles[step - 1] }}</p>
 
     <div class="mt-6 space-y-4">
@@ -279,5 +343,15 @@ const canContinueText = computed(() => (isLastStep.value ? 'Ver mi resultado' : 
     <p class="mt-4 text-center text-xs text-slate-400">
       Solo necesitamos el nombre, el gasto y la venta. Lo demás es opcional.
     </p>
+    </template>
+
+    <div v-else-if="loading || !loaded" class="py-16 text-center text-slate-400">Cargando…</div>
+
+    <div v-else class="rounded-3xl bg-white p-6 text-center ring-1 ring-slate-200">
+      <p class="font-semibold text-slate-900">No encontramos esa actividad</p>
+      <div class="mt-4">
+        <AppButton block @click="router.push('/historial')">Ir al historial</AppButton>
+      </div>
+    </div>
   </PageShell>
 </template>

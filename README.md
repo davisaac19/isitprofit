@@ -24,7 +24,8 @@ pnpm screenshots    # capturas de todas las pantallas en /tmp
 ```
 
 > `pnpm verify` usa Playwright con el canal `msedge` (Microsoft Edge ya instalado),
-> así que no descarga ningún navegador. Requiere `pnpm preview` en otra terminal.
+> así que no descarga ningún navegador. Requiere `pnpm preview` en otra terminal y
+> recorre los flujos principales, incluida la edición de actividades.
 
 ---
 
@@ -123,13 +124,16 @@ Ningún componente cambia. No se accede a `localStorage` desde las vistas.
 | Ruta | Pantalla |
 | --- | --- |
 | `/` | Inicio: resumen del mes + últimas actividades |
-| `/registrar` | Wizard de 4 pasos (`?paso=1..4`) |
+| `/registrar` | Wizard de 4 pasos (`?paso=1..4`); acepta `?editar=<id>` para editar |
 | `/resultado/:id` | Resultado: la pantalla más importante |
 | `/historial` | Historial agrupado por fecha, con borrado |
 | `/actividad/:id` | Detalle completo |
 
 El paso del wizard vive en la URL (`?paso=2`), así el botón "atrás" del teléfono
 funciona y no hay estado duplicado que se desincronice.
+Desde el detalle puedes editar una actividad. La edición reutiliza el mismo
+wizard y sus validaciones, conserva el identificador y la fecha originales, y
+actualiza el resultado y el historial al guardar.
 
 ---
 
@@ -151,8 +155,8 @@ maskable. Se puede instalar en el teléfono y abrir sin conexión.
 
 ## Verificación
 
-`pnpm verify` recorre el flujo completo en un navegador real (viewport móvil de
-390×844) y comprueba los 8 casos pedidos:
+`pnpm verify` recorre los flujos principales en un navegador real (viewport
+móvil de 390×844) y comprueba estos casos:
 
 1. Ganancia: `$500` costo, `$750` ventas → `+$250`, margen `33.3%`, `+$50/h` con 5 h.
 2. Pérdida: `$500` costo, `$400` ventas → `-$100` y "No ganaste".
