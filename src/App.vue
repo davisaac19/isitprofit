@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { Analytics } from '@vercel/analytics/vue'
 import { useActivities } from './composables/useActivities'
 
 const { load } = useActivities()
@@ -12,4 +13,5 @@ onMounted(() => {
 
 <template>
   <RouterView />
+  <Analytics />
 </template>

@@ -156,6 +156,13 @@ Todo funciona offline en el dispositivo.
 Nombre "¿Sí Gané?", tema verde, `display: standalone`, iconos 192/512 y uno
 maskable. Se puede instalar en el teléfono y abrir sin conexión.
 
+## Analíticas
+
+La app integra Vercel Web Analytics mediante `@vercel/analytics/vue`. El
+componente raíz registra las visitas a las rutas de Vue Router. Para recibir
+datos, habilita **Web Analytics** en la configuración del proyecto en Vercel y
+despliega la aplicación.
+
 ---
 
 ## Verificación

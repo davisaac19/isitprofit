@@ -46,6 +46,8 @@ y guarda las actividades localmente; no tiene backend, cuentas ni sincronizació
 - La ruta `/proyeccion` estima recuperación de inversión, primera ganancia y
   unidades/tiempo para alcanzar una meta. Su supuesto actual es un costo fijo
   por lote, sin costo incremental por pieza.
+- Vercel Web Analytics se monta una vez en `src/App.vue` mediante
+  `@vercel/analytics/vue`; Vue Router permite medir navegación entre rutas.
 - Los datos opcionales (cantidad, precio unitario y tiempo) deben seguir siendo
   opcionales y eliminarse al guardar si se quitaron del formulario.
 - Actualiza `README.md` cuando cambien las rutas o el flujo de usuario y amplía

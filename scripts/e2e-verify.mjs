@@ -59,6 +59,15 @@ async function main() {
   const page = await context.newPage()
 
   const consoleErrors = []
+  let analyticsScriptRequests = 0
+  await page.route('**/_vercel/insights/script.js', async (route) => {
+    analyticsScriptRequests += 1
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: '/* Served by Vercel in deployed environments. */',
+    })
+  })
   page.on('console', (msg) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text())
   })
@@ -315,6 +324,7 @@ async function main() {
   check('Manifest con iconos', (manifest?.icons ?? []).length >= 2)
 
   // ---------- Consola limpia ----------
+  check('Vercel Analytics carga su script', analyticsScriptRequests > 0)
   check('Sin errores de consola', consoleErrors.length === 0, consoleErrors.slice(0, 3).join(' | '))
 
   await page.screenshot({ path: '/tmp/sigane-historial.png', fullPage: true })
