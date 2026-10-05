@@ -85,6 +85,12 @@ const monthMessage = computed(() => {
         <span class="text-xl leading-none">+</span> Registrar actividad
       </AppButton>
     </RouterLink>
+    <RouterLink
+      to="/proyeccion"
+      class="mt-3 block rounded-2xl px-3 py-2 text-center text-sm font-semibold text-brand-700 transition hover:bg-white/70"
+    >
+      ¿Cuánto necesito vender para llegar a mi meta?
+    </RouterLink>
 
     <!-- Últimas actividades -->
     <section class="mt-7">

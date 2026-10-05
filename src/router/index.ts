@@ -15,6 +15,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Registrar actividad' },
   },
   {
+    path: '/proyeccion',
+    name: 'projection',
+    component: () => import('../views/ProfitabilityProjectionView.vue'),
+    meta: { title: 'Proyectar ventas' },
+  },
+  {
     path: '/resultado/:id',
     name: 'result',
     component: () => import('../views/ResultView.vue'),

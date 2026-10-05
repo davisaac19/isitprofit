@@ -43,6 +43,9 @@ y guarda las actividades localmente; no tiene backend, cuentas ni sincronizació
 - Mantén la lógica de negocio pura en `src/domain/`.
 - El wizard de registro usa `?paso=1..4` para mantener el paso en la URL. El modo
   edición usa `?editar=<id>` y debe conservar el ID y la fecha de la actividad.
+- La ruta `/proyeccion` estima recuperación de inversión, primera ganancia y
+  unidades/tiempo para alcanzar una meta. Su supuesto actual es un costo fijo
+  por lote, sin costo incremental por pieza.
 - Los datos opcionales (cantidad, precio unitario y tiempo) deben seguir siendo
   opcionales y eliminarse al guardar si se quitaron del formulario.
 - Actualiza `README.md` cuando cambien las rutas o el flujo de usuario y amplía

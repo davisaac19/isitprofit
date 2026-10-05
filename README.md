@@ -125,6 +125,7 @@ Ningún componente cambia. No se accede a `localStorage` desde las vistas.
 | --- | --- |
 | `/` | Inicio: resumen del mes + últimas actividades |
 | `/registrar` | Wizard de 4 pasos (`?paso=1..4`); acepta `?editar=<id>` para editar |
+| `/proyeccion` | Proyección de piezas y tiempo para recuperar una inversión fija y alcanzar una meta |
 | `/resultado/:id` | Resultado: la pantalla más importante |
 | `/historial` | Historial agrupado por fecha, con borrado |
 | `/actividad/:id` | Detalle completo |
@@ -134,6 +135,10 @@ funciona y no hay estado duplicado que se desincronice.
 Desde el detalle puedes editar una actividad. La edición reutiliza el mismo
 wizard y sus validaciones, conserva el identificador y la fecha originales, y
 actualiza el resultado y el historial al guardar.
+Debajo del CTA principal del inicio puedes abrir la proyección de ventas. Se
+indican la inversión total del lote, el precio por pieza y la meta de ganancia;
+el ritmo semanal de ventas es opcional y estima el tiempo. La proyección supone
+que no hay costos adicionales por cada pieza vendida.
 
 ---
 

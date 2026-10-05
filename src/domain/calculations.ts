@@ -73,6 +73,61 @@ export function breakEvenUnits(costCents: number, unitPriceCents: number | undef
   return Math.ceil(cost / price)
 }
 
+export type ProfitabilityProjection = {
+  /** Pieces needed to recover the fixed batch cost. */
+  breakEvenUnits: number
+  /** First piece count that produces a positive profit. */
+  profitableUnits: number
+  /** Pieces needed to recover costs and reach the requested profit. */
+  targetUnits: number
+  breakEvenWeeks: number | null
+  profitableWeeks: number | null
+  targetWeeks: number | null
+}
+
+/**
+ * Projects piece counts and time for a fixed batch cost (no extra cost per sale).
+ * Money remains in integer cents; time estimates are returned in weeks.
+ */
+export function projectProfitability(
+  costCents: number,
+  unitPriceCents: number,
+  targetProfitCents: number,
+  unitsPerWeek?: number,
+): ProfitabilityProjection | null {
+  if (
+    !Number.isSafeInteger(costCents) ||
+    costCents < 0 ||
+    !Number.isSafeInteger(unitPriceCents) ||
+    unitPriceCents <= 0 ||
+    !Number.isSafeInteger(targetProfitCents) ||
+    targetProfitCents <= 0
+  ) {
+    return null
+  }
+
+  if (unitsPerWeek !== undefined && (!Number.isSafeInteger(unitsPerWeek) || unitsPerWeek <= 0)) {
+    return null
+  }
+
+  const breakEvenUnits = Math.ceil(costCents / unitPriceCents)
+  const profitableUnits = Math.floor(costCents / unitPriceCents) + 1
+  const targetUnits = Math.ceil((costCents + targetProfitCents) / unitPriceCents)
+  if (![breakEvenUnits, profitableUnits, targetUnits].every(Number.isSafeInteger)) return null
+
+  const weeks = (units: number): number | null =>
+    unitsPerWeek === undefined ? null : units / unitsPerWeek
+
+  return {
+    breakEvenUnits,
+    profitableUnits,
+    targetUnits,
+    breakEvenWeeks: weeks(breakEvenUnits),
+    profitableWeeks: weeks(profitableUnits),
+    targetWeeks: weeks(targetUnits),
+  }
+}
+
 /** Precio promedio real por pieza. `null` si falta cantidad o ventas. */
 export function averageUnitPrice(
   revenueCents: number,

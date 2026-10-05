@@ -80,6 +80,28 @@ async function main() {
   check('Inicio muestra acción principal', await page.getByRole('button', { name: /Registrar actividad/ }).isVisible())
   check('Resumen del mes en $0', (await page.locator('text=Ganancia del mes').count()) > 0)
 
+  // ---------- Proyección de ventas y meta ----------
+  await page.getByRole('link', { name: /¿Cuánto necesito vender para llegar a mi meta/ }).click()
+  await page.waitForURL(/\/proyeccion/)
+  check('Proyección abre desde el inicio', await page.getByRole('heading', { name: 'Proyectar ventas' }).isVisible())
+  await page.fill('[data-testid="projection-cost"]', '500')
+  await page.fill('[data-testid="projection-price"]', '25')
+  await page.fill('[data-testid="projection-target"]', '500')
+  await page.fill('[data-testid="projection-pace"]', '8')
+  check('Proyección calcula recuperación en 20 piezas', await page.getByText('20 piezas').isVisible())
+  check('Proyección distingue primera ganancia en 21 piezas', await page.getByText('21 piezas').isVisible())
+  check('Proyección calcula meta de $500 en 40 piezas', await page.getByText('40 piezas').isVisible())
+  check('Proyección calcula tiempo para alcanzar la meta', await page.getByText('aprox. 5 semanas').isVisible())
+  await page.fill('[data-testid="projection-price"]', '0')
+  check('Proyección rechaza precio de $0', await page.getByText('El precio debe ser mayor a $0').isVisible())
+  check('Proyección oculta resultados con precio inválido', (await page.getByTestId('projection-results').count()) === 0)
+  await page.fill('[data-testid="projection-price"]', '25')
+  await page.fill('[data-testid="projection-pace"]', '')
+  check('Proyección sigue disponible sin ritmo semanal', await page.getByTestId('projection-results').isVisible())
+  check('Proyección omite tiempo cuando falta ritmo', (await page.getByText(/semanas/).count()) === 0)
+  await page.getByRole('button', { name: 'Volver' }).click()
+  await page.waitForURL(BASE)
+
   // ---------- Caso 1: ganancia con tiempo ----------
   await fillActivity(page, { name: 'Manzanas forradas', spent: '500', revenue: '750', hours: '5' })
   const hero1 = await page.locator('section p.num').first().innerText()
